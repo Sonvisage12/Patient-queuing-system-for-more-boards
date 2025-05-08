@@ -24,7 +24,7 @@ uint8_t arrivalMAC[] = {0x30, 0xC6, 0xF7, 0x44, 0x1D, 0x24};
 uint8_t doctorMAC1[] = {0x78, 0x42, 0x1C, 0x6C, 0xA8, 0x3C};
 uint8_t doctorMAC[]  = {0x78, 0x42, 0x1C, 0x6C, 0xE4, 0x9C};
 
-void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
+void onDataRecv(const esp_now_recv_info_t *recv_info, const uint8_t *incomingData, int len) {
   QueueItem item;
   memcpy(&item, incomingData, sizeof(item));
 
@@ -33,6 +33,13 @@ void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
   } else {
     sharedQueue.addIfNew(String(item.uid), String(item.timestamp), item.number);
   }
+
+  Serial.print("📩 Received from: ");
+  char macStr[18];
+  snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+           recv_info->src_addr[0], recv_info->src_addr[1], recv_info->src_addr[2],
+           recv_info->src_addr[3], recv_info->src_addr[4], recv_info->src_addr[5]);
+  Serial.println(macStr);
 
   sharedQueue.print();
 }
